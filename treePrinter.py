@@ -7,6 +7,7 @@ Created on Thu Apr  8 09:59:43 2021
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from matplotlib.path import Path
 from PIL import Image
 import numpy as np
 from anytree import Node, RenderTree, PreOrderIter
@@ -23,6 +24,14 @@ class MyNode(Node):
     nodeCount = 0
     treeRoot = None
     SchemaRMax = 0
+
+    #size manipulation
+    textSize = 1
+    markerSize = 1
+    limitsSize = .6
+    ## distance between parent and children multiplicator
+    dpiSize = 1000
+
 
 
     def __init__(self, name, parent=None):
@@ -116,7 +125,8 @@ class MyNode(Node):
             #theta is in the middle
             thetaFormula = child.leftLimit + 0.5*(child.rightLimit - child.leftLimit)
             child.theta = thetaFormula
-            child.r = child.depth*child.depth*800
+            #child.r = child.depth*child.depth*MyNode.graphLevelQuotient
+            child.r = child.depth*child.depth
             bufferR=200
             if child.r+bufferR > MyNode.SchemaRMax:
                 MyNode.SchemaRMax = child.r + bufferR
@@ -139,10 +149,11 @@ class MyNode(Node):
 
         # print and save
         #imgplot = plt.imshow(img)
-        plt.savefig('figure.png', transparent=True)
-        plt.show()
+        plt.savefig('figure.png', transparent=True, figsize=(1,1),  dpi=MyNode.dpiSize)
+        #plt.show()
 
     def printNode(self, node, ax):
+        colors = ['b', 'r', 'g', 'm', 'y', 'bisque', 'lightcoral', 'limegreen', 'lavender', 'indigo']
         text=node.name
         if node.aliases:
             text = text + '\n' + str(node.aliases)
@@ -152,16 +163,18 @@ class MyNode(Node):
         #print data
         ax.text(node.theta,node.r,
             text,
-            fontsize=8, ha="center", va="center",
+            fontsize=MyNode.textSize, ha="center", va="center",
             bbox=dict(boxstyle='round',
                           ec=(.1, .5, .5),
-                          fc=(.1, .8, .8),
+                          fc=(.1, .8, .8),linewidth=0.02
                           )
             )
+        #ax.text(node.theta, node.r, text, size=3, va="center", ha="center", rotation=0,
+        #bbox=dict(boxstyle=custom_box_style, alpha=0.4))
 
         #print link parent->child
         if node.r > 0:
-            noPoints=10
+            noPoints=20
             #parent is starting point
             radsStart=node.parent.theta
             radsEnd=node.theta
@@ -174,7 +187,7 @@ class MyNode(Node):
             rEnd=node.r
             rdt=(rEnd-rStart)/noPoints
             r = np.arange(rStart, rEnd, rdt)
-            ax.plot(rads, r, 'g.', alpha=0.5)
+            ax.plot(rads, r, '.', color=colors[node.nodeId%len(colors)],markeredgewidth=0.01, markersize=MyNode.markerSize, alpha=0.8)
 
         
     def printLimits(self, node, ax):
@@ -187,7 +200,7 @@ class MyNode(Node):
         rads=np.arange(node.leftLimit, node.rightLimit, radsdt)
         r = node.r*np.ones(noPoints)
         #colors are iterated, the rads are cut to overcome the situation where +/- 1 is created
-        ax.plot(rads[2:noPoints-2], r[2:noPoints-2], color=colors[node.nodeId%len(colors)], alpha=0.75)
+        ax.plot(rads[2:noPoints-2], r[2:noPoints-2], color=colors[node.nodeId%len(colors)], linewidth=MyNode.limitsSize, alpha=0.7)
         #ax.fill(radsLeft, r, radsRight, r,  facecolor=colors[node.nodeId], alpha=0.25)
 
         
