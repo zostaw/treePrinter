@@ -14,7 +14,7 @@ from anytree import Node, RenderTree, PreOrderIter
 
 
 
-class MyNode(Node):
+class MyTree(Node):
     'This class contains specifics of a node, the name, aliases and description.\
     They are representing single table between which which relations can be defined.'
     # name should be string
@@ -35,16 +35,16 @@ class MyNode(Node):
 
 
     def __init__(self, name, parent=None):
-        if (MyNode.nodeCount == 0):
-            MyNode.treeRoot = self
+        if (MyTree.nodeCount == 0):
+            MyTree.treeRoot = self
         elif parent == None:
-            parent = MyNode.treeRoot
+            parent = MyTree.treeRoot
         super().__init__(name, parent)
         #data
         self.name = name
         self.aliases = None
         self.description = None
-        self.nodeId=MyNode.nodeCount
+        self.nodeId=MyTree.nodeCount
         #positions
         self.theta = 0
         self.r = 0
@@ -55,7 +55,7 @@ class MyNode(Node):
         self.rightLimit = 0
 
         self.recalculatePositions()
-        MyNode.nodeCount+=1
+        MyTree.nodeCount+=1
 
 
 # get/set data
@@ -69,20 +69,20 @@ class MyNode(Node):
         return self.description
 
     def displayEverything(self):
-        print ("Total MyNodes %d" % MyNode.nodeCount)
+        print ("Total MyTrees %d" % MyTree.nodeCount)
         print ("The nodeId %d" % self.nodeId)
         print ("The name %s" % self.name)
         print ("The aliases %s" % self.aliases)
         print ("The description %s" % self.description)
 
     def recalculatePositions(self):
-        if MyNode.nodeCount == 0:
+        if MyTree.nodeCount == 0:
             return None
-        #for pre, fill, node in RenderTree(MyNode.treeRoot):
+        #for pre, fill, node in RenderTree(MyTree.treeRoot):
         #    print("%s%s" % (pre, node.name))
         
         #set root position
-        root = MyNode.treeRoot
+        root = MyTree.treeRoot
         root.ratio = 1
         root.theta = 0
         root.r = 0
@@ -125,33 +125,33 @@ class MyNode(Node):
             #theta is in the middle
             thetaFormula = child.leftLimit + 0.5*(child.rightLimit - child.leftLimit)
             child.theta = thetaFormula
-            #child.r = child.depth*child.depth*MyNode.graphLevelQuotient
+            #child.r = child.depth*child.depth*MyTree.graphLevelQuotient
             child.r = child.depth*child.depth
             bufferR=200
-            if child.r+bufferR > MyNode.SchemaRMax:
-                MyNode.SchemaRMax = child.r + bufferR
+            if child.r+bufferR > MyTree.SchemaRMax:
+                MyTree.SchemaRMax = child.r + bufferR
             #print(str(child.name) + ": " + str(child))
             self.calculateChildren(child)
         return
 
     def print_schema(self):
         figure, ax = plt.subplots(subplot_kw={'projection': 'polar'}, frameon=False)
-        #ax.set_rticks([MyNode.SchemaRMax/2, MyNode.SchemaRMax])
+        #ax.set_rticks([MyTree.SchemaRMax/2, MyTree.SchemaRMax])
         ax.set_rticks([])
         ax.set_thetagrids([0, 45, 90, 135, 180, 225, 270, 315], labels=[])
-        ax.set_rmax(MyNode.SchemaRMax)
+        ax.set_rmax(MyTree.SchemaRMax)
         #ax.grid(False)
 
-        for node in MyNode.treeRoot.descendants:
+        for node in MyTree.treeRoot.descendants:
             self.printNode(node, ax)
 
             self.printLimits(node, ax)
 
         # print and save
         #imgplot = plt.imshow(img)
-        plt.savefig('figure.png', transparent=True, figsize=(1,1),  dpi=MyNode.dpiSize)
-        #plt.show()
-
+        #plt.savefig('figure.png', transparent=True, figsize=(1,1),  dpi=MyTree.dpiSize)
+        plt.show()
+        
     def printNode(self, node, ax):
         colors = ['b', 'r', 'g', 'm', 'y', 'bisque', 'lightcoral', 'limegreen', 'lavender', 'indigo']
         text=node.name
@@ -163,7 +163,7 @@ class MyNode(Node):
         #print data
         ax.text(node.theta,node.r,
             text,
-            fontsize=MyNode.textSize, ha="center", va="center",
+            fontsize=MyTree.textSize, ha="center", va="center",
             bbox=dict(boxstyle='round',
                           ec=(.1, .5, .5),
                           fc=(.1, .8, .8),linewidth=0.02
@@ -187,7 +187,7 @@ class MyNode(Node):
             rEnd=node.r
             rdt=(rEnd-rStart)/noPoints
             r = np.arange(rStart, rEnd, rdt)
-            ax.plot(rads, r, '.', color=colors[node.nodeId%len(colors)],markeredgewidth=0.01, markersize=MyNode.markerSize, alpha=0.8)
+            ax.plot(rads, r, '.', color=colors[node.nodeId%len(colors)],markeredgewidth=0.01, markersize=MyTree.markerSize, alpha=0.8)
 
         
     def printLimits(self, node, ax):
@@ -200,7 +200,7 @@ class MyNode(Node):
         rads=np.arange(node.leftLimit, node.rightLimit, radsdt)
         r = node.r*np.ones(noPoints)
         #colors are iterated, the rads are cut to overcome the situation where +/- 1 is created
-        ax.plot(rads[2:noPoints-2], r[2:noPoints-2], color=colors[node.nodeId%len(colors)], linewidth=MyNode.limitsSize, alpha=0.7)
+        ax.plot(rads[2:noPoints-2], r[2:noPoints-2], color=colors[node.nodeId%len(colors)], linewidth=MyTree.limitsSize, alpha=0.7)
         #ax.fill(radsLeft, r, radsRight, r,  facecolor=colors[node.nodeId], alpha=0.25)
 
         
